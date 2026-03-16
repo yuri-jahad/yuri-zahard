@@ -1,21 +1,17 @@
-import { makeToken } from '../shared/utils'
-import type { CreateRoomResponse, RoomConfig } from './types'
+
+import { HEADERS } from '../shared/constants'
+import type { CreateRoomResponse, RoomConfig, JoinRoomResponse } from './types'
 
 const startRoomURL = 'https://jklm.fun/api/startRoom'
 const joinRoomURL = 'https://jklm.fun/api/joinRoom'
 
-class RoomService {
-  private HEADERS = {
-    'Content-Type': 'application/json',
-    Origin: 'https://jklm.fun',
-    Referer: 'https://jklm.fun/'
-  }
+export class RoomService {
 
   createRoom = async (roomInfos: RoomConfig): Promise<string | undefined> => {
     try {
       const response = await fetch(startRoomURL, {
         method: 'POST',
-        headers: this.HEADERS,
+        headers: HEADERS,
         body: JSON.stringify({
           name: roomInfos.name,
           isPublic: roomInfos.isPublic,
@@ -32,26 +28,19 @@ class RoomService {
     }
   }
 
-  joinRoom = async (roomCode: string) => {
+  getServerUrl = async (roomCode: string): Promise<string | undefined> => {
     try {
       const response = await fetch(joinRoomURL, {
-        headers: this.HEADERS,
         method: 'POST',
-        body: JSON.stringify({roomCode})
+        headers: HEADERS,
+        body: JSON.stringify({ roomCode })
       })
 
-      if (!response.ok) return; 
+      if (!response.ok) return
 
-      console.log(await response.json())
+      const data = (await response.json()) as JoinRoomResponse
+      console.log('joinRoom full response:', JSON.stringify(data))
+      return data.url
     } catch (error) {}
   }
 }
-
-const config: RoomConfig = {
-  name: 'test',
-  gameId: 'bombparty',
-  isPublic: false,
-  creatorUserToken: makeToken()
-}
-
-console.log(new RoomService().createRoom(config))
