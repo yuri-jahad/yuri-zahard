@@ -6,6 +6,7 @@ import type { ServerToClientEvents, ClientToServerEvents } from './types'
 
 export class GameSocket extends EventEmitter {
   readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>
+  private session: { gameId: string; roomCode: string; userToken: string } | null = null
 
   constructor(serverUrl: string) {
     super()
@@ -41,6 +42,7 @@ export class GameSocket extends EventEmitter {
   }
 
   join(gameId: string, roomCode: string, userToken: string): void {
+    this.session = { gameId, roomCode: roomCode.toUpperCase(), userToken }
     const doJoin = () =>
       this.socket.emit('joinGame', gameId, roomCode.toUpperCase(), userToken)
 
@@ -49,5 +51,26 @@ export class GameSocket extends EventEmitter {
     } else {
       this.socket.once('connect', doJoin)
     }
+  }
+
+  joinRound(): void {
+    if (!this.session) return
+
+    if (this.socket.connected) {
+      const { gameId, roomCode, userToken } = this.session
+      this.socket.emit('joinGame', gameId, roomCode, userToken)
+      this.socket.once('setup', () => this.socket.emit('joinRound'))
+    } else {
+      const { gameId, roomCode, userToken } = this.session
+      this.socket.connect()
+      this.socket.once('connect', () => {
+        this.socket.emit('joinGame', gameId, roomCode, userToken)
+        this.socket.once('setup', () => this.socket.emit('joinRound'))
+      })
+    }
+  }
+
+  disconnect(): void {
+    this.socket.disconnect()
   }
 }

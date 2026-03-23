@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events'
 import { io, Socket } from 'socket.io-client'
 import { HEADERS } from '../shared/constants'
-import type { ServerToClientEvents, ClientToServerEvents } from './types'
+import type { ServerToClientEvents, ClientToServerEvents } from './type'
 
 export class RoomSocket extends EventEmitter {
   readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>
@@ -22,7 +22,10 @@ export class RoomSocket extends EventEmitter {
     )
 
     this.socket.onAny((event, ...args) =>
-      console.log('ROOM:', event, ...args)
+      console.log('ROOM IN:', event, ...args)
+    )
+    this.socket.onAnyOutgoing((event, ...args) =>
+      console.log('ROOM OUT:', event, ...args)
     )
 
     const events: (keyof ServerToClientEvents)[] = [
@@ -40,14 +43,14 @@ export class RoomSocket extends EventEmitter {
     })
   }
 
-  join(roomCode: string, userToken: string, onJoined: (resp: any) => void) {
+  join(roomCode: string, userToken: string, nickname: string, onJoined: (resp: any) => void) {
     this.socket.once('connect', () => {
       this.socket.emit(
         'joinRoom',
         {
           roomCode: roomCode.toUpperCase(),
           userToken,
-          nickname: 'BotTest',
+          nickname,
           language: 'fr-FR',
           auth: null,
           picture: null
@@ -55,5 +58,13 @@ export class RoomSocket extends EventEmitter {
         onJoined
       )
     })
+  }
+
+  sendChat(message: string, style?: Record<string, string>): void {
+    this.socket.emit('chat', message, style ?? null)
+  }
+
+  disconnect(): void {
+    this.socket.disconnect()
   }
 }

@@ -1,11 +1,3 @@
-// game/events.ts
-export interface ClientToServerEvents {
-  setup: (data: any) => void
-  joinGame: (gameId: string, roomCode: string, userToken: string) => void
-  joinRound: () => void
-}
-
-// game/types.ts
 export interface ServerToClientEvents {
   setup: (data: SetupData) => void
   setStartTime: (serverNow: number, startTime: number) => void

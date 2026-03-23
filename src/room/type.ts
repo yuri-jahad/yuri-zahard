@@ -3,6 +3,7 @@ export interface RoomConfig {
   isPublic: boolean
   gameId: 'bombparty'
   creatorUserToken: string
+  nickname?: string
 }
 
 export interface CreateRoomResponse {
@@ -13,7 +14,6 @@ export interface CreateRoomResponse {
 export interface JoinRoomResponse {
   url: string
 }
-
 
 export interface ServerToClientEvents {
   chat: (author: string, message: string) => void
@@ -27,14 +27,27 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  joinRoom: (data: {
-    roomCode: string
-    userToken: string
-    nickname: string
-    language: string
-    auth: null
-    picture: null
-  }, cb: (resp: any) => void) => void
+  joinRoom: (
+    data: {
+      roomCode: string
+      userToken: string
+      nickname: string
+      language: string
+      auth: null
+      picture: null
+    },
+    cb: (resp: any) => void
+  ) => void
 
-  sendChat: (data: { message: string }) => void
+  chat: (
+    message: string,
+    customProperties?: Record<string, string> | null
+  ) => void
+}
+
+export interface RoomSettings {
+  roomName: string
+  gameId: 'bombparty'
+  langue: 'fr-FR' | 'en-US'
+  isPublic: boolean
 }

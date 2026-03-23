@@ -1,22 +1,31 @@
 import type { Command } from '../shared/types'
 
-export const commands : Command[] = [
+const BOT_STYLE = { color: '#a855f7' }
+
+export const commands: Command[] = [
   {
     variants: ['c', 'search', 'recherche'],
     description: 'Recherche un mot dans le dictionnaire',
-    execute (args, ctx) {
-      ctx.roomSocket.socket.emit('sendChat', { message: args.join(' ') })
+    execute(args, ctx) {
+      const word = args.join(' ')
+      if (!word) return
+      ctx.roomSocket.sendChat(word, BOT_STYLE)
     }
   },
   {
-    variants: ['join', 'viens'],
-    description: 'Join game room',
-    execute ([gameId, roomCode, userToken], context) {
-      if (!gameId || !roomCode || !userToken) {
-        console.warn('Usage: .join <gameId> <roomCode> <userToken>')
-        return
-      }
-      context.gameSocket.join(gameId, roomCode, userToken)
+    variants: ['viens'],
+    description: 'Fait rejoindre le bot dans la partie en cours',
+    execute(_args, ctx) {
+      ctx.gameSocket.joinRound()
+      ctx.roomSocket.sendChat('Je suis là !', BOT_STYLE)
+    }
+  },
+  {
+    variants: ['stop'],
+    description: 'Retire le bot de la partie (reste dans le salon)',
+    execute(_args, ctx) {
+      ctx.gameSocket.disconnect()
+      ctx.roomSocket.sendChat('Je quitte la partie !', BOT_STYLE)
     }
   }
 ]

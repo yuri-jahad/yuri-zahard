@@ -1,18 +1,14 @@
-import { Client } from "./core/client";
-import { makeToken } from "./shared/utils";
-import type { RoomConfig } from './room/types';
+import { Client } from './core/client'
+import { makeToken } from './shared/utils'
+import { Bot } from './bot/model';
+import type { RoomConfig } from './room/type';
 
 const config: RoomConfig = {
-  name: 'test',
+  name: 'Yuri Bot',
   gameId: 'bombparty',
   isPublic: false,
-  creatorUserToken: makeToken()
+  creatorUserToken: makeToken(),
+  nickname: 'YuriBot'
 }
 
-console.log(config)
-
-console.log(await new Client().initialize(config))
-
-// const socket = new WebSocket("")
-
-
+await new Client().initialize(config, new Bot(config.nickname || "missing.no", ''))
